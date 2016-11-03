@@ -21,20 +21,17 @@ volatile u8 DataSensoCheck=0;
 const u8* wifiap_ssid="KLL-ESP8266";	
 const u8* wifiap_password="12345678"; 
 
-void M35PowerOn(void)
-{
-	DRV_WIFI_ON;
-	DRV_WIFI_CHPD_ONE;
-	delay_ms(1500);
-	if(SystemDebug==2)printf("DRV_WIFI_ON\r\n");
-}
 
-void M35PowerOff(void)
+
+void atk_8266_reset(void)
 {
-	u8 i=0;
-	DRV_WIFI_OFF;
-	if(SystemDebug==2)printf("DRV_WIFI_OFF\r\n");
-	for(i=0;i<40;i++)delay_ms(1000);
+	if(SystemDebug==2)printf("atk_8266_reset\r\n");
+	DRV_WIFI_RST_ONE;
+	delay_ms(10);
+	DRV_WIFI_RST_ZERO;
+	delay_ms(20);
+	DRV_WIFI_RST_ONE;
+	delay_ms(10);
 }
 
 
@@ -631,4 +628,20 @@ u8 Conecet2TheHandFromUdp(void)
 	Connect2Hand("255.255.255.255","6060,6060,0");
 	return 0;
 	
+}
+
+
+u8 atk_8266_CheckStatus(u32 timeout)
+{
+	u8 res=0;
+	u8 constate;
+	while(--timeout)
+		{
+			delay_ms(10);
+			constate=atk_8266_consta_check();
+			if(constate=='+')break;
+			else	delay_ms(300);
+		}
+	if(timeout==0)res=1;
+	return res;
 }

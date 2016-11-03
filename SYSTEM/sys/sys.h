@@ -60,12 +60,9 @@
 
 __packed typedef struct 
 {
-	u16 HandInter;			//设置数据上传间隔
-	u8 Addrnum;				
+	u8 SysSpeedBit;
 	u8 UserName[32];			//设置用户名
 	u8 Passwd[31];				//设置密码
-	u8 speedlimit;			
-	u8 delaytime;
 	u8 saveflag;				//保存标志
 }_system_setings;
 

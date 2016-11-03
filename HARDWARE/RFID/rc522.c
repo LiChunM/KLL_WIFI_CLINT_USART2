@@ -634,3 +634,32 @@ char PcdBakValue(u8 sourceaddr, u8 goaladdr)
     return status;
 }
 
+
+
+
+
+
+void Rc522Test(void)
+{
+	u8 status=0;
+	status = PcdRequest(PICC_REQALL,RC522CT);
+	if(status==MI_OK)
+		{
+			printf("PcdRequest_MI_OK\r\n");
+			printf("pTagType[0x%02X%02X]\r\n",RC522CT[0],RC522CT[1]);
+			status=MI_ERR;
+			status = PcdAnticoll(RC522SN);
+				if(status==MI_OK)
+					{
+						status = MI_ERR;
+						printf("RC522RDID:%02x %02x %02x %02x\r\n",RC522SN[0],RC522SN[1],RC522SN[2],RC522SN[3]);
+					}
+				delay_ms(1000);
+				delay_ms(1000);
+		}
+	else
+		{
+			printf("PcdRequest_MI_ERROR,Next!!\r\n");
+			delay_ms(1000);
+		}
+}

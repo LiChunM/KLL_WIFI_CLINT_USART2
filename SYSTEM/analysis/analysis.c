@@ -295,6 +295,37 @@ void Command_HandData2(u8 *len)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+
+void RePayUP_CarData(u8 *len)
+{
+	u8 length=0x10;
+	Hand_Data[0]=0x7e;
+	Hand_Data[1]=0x7e;
+	Hand_Data[2]=++num0;
+	Hand_Data[3]=length;
+	Hand_Data[4]=0x01;
+	Hand_Data[5]=0x00;
+	Hand_Data[6] = 0x0d;
+	Hand_Data[7] = 0x0a;
+	*len=8;
+}
+
+
+
+void ReReg_CarData(u8 *len)
+{
+	u8 length=0x10;
+	Hand_Data[0]=0x7e;
+	Hand_Data[1]=0x7e;
+	Hand_Data[2]=++num0;
+	Hand_Data[3]=length;
+	Hand_Data[4]=0x52;
+	Hand_Data[5]=0x00;
+	Hand_Data[6] = 0x0d;
+	Hand_Data[7] = 0x0a;
+	*len=8;
+}
+
 SYS_PARA_T	sys_data;
 
 void change_rail(u8 flag)
@@ -305,11 +336,29 @@ void change_rail(u8 flag)
 
 void dispose_wifi_cmd(u8 *pRecStr)
 {
+	u8 i=0;
 	if((pRecStr[0] == 0x7e)&&(pRecStr[1] == 0x7e))
 		{	
 			if(pRecStr[4] == 0x43)
 				{
 					change_rail(pRecStr[5]);
+				}
+			if(pRecStr[4] == 0x44)
+				{
+					mymemset(systemset.UserName,0,sizeof(systemset.UserName));
+					mymemset(systemset.Passwd,0,sizeof(systemset.Passwd));
+					while(pRecStr[5+i]!=0x2c)
+						{
+							systemset.UserName[i]=pRecStr[5+i];
+							i++;
+						}
+					i++;
+					while(pRecStr[5+i]!=0x2c)
+						{
+							systemset.Passwd[i]=pRecStr[5+i];
+							i++;
+						}
+					DataBiteInfo|=1<<0;
 				}
 			if(pRecStr[4] == 0x50)
 				{
@@ -318,7 +367,87 @@ void dispose_wifi_cmd(u8 *pRecStr)
 					sys_data.car_max_speed_rate =  pRecStr[9];
 					sys_data.cruve_slowdown_switch =  pRecStr[12];
 					sys_data.cruve_slowdown_rate =  pRecStr[13];
+					sys_data.speed_buf[sys_data.spedd_counter]=sys_data.speed;
+					sys_data.spedd_counter++;
+					if(sys_data.spedd_counter==20)
+						{
+							DataBiteInfo|=1<<2;
+							sys_data.spedd_counter=0;
+						}
+					
+				}
+			if(pRecStr[4] == 0x53)
+				{
+					DataBiteInfo|=1<<1;
 				}
 		}
 }
+
+
+u8 SaveUsnamePswd(u8 outtime)
+{
+	u8 res=0;
+	while(--outtime)	
+		{
+			delay_ms(10);
+			if(DataBiteInfo&0x01)break;
+		}
+	DataBiteInfo&=~(1<<0);
+	if(outtime==0)res=1;
+	return res;
+}
+
+
+u8 RegSucess(u8 outtime)
+{
+	u8 res=0;
+	while(--outtime)	
+		{
+			delay_ms(10);
+			if(DataBiteInfo&0x02)break;
+		}
+	DataBiteInfo&=~(1<<1);
+	if(outtime==0)res=1;
+	return res;
+}
+
+void CheckSpeedBit(void)
+{
+	u8 i=0;
+	if(DataBiteInfo&0x02)
+		{
+			for(i=0;i<20;i++)
+				{
+					if(sys_data.speed_buf[i]>5)
+						{
+							if(i==19)
+								{
+									systemset.SysSpeedBit=1;
+									sysset_save_para(&systemset);
+								}
+						}
+					else
+						{
+							break;
+						}
+				}
+			for(i=0;i<20;i++)
+				{
+					if(sys_data.speed_buf[i]<=5)
+						{
+							if(i==19)
+								{
+									systemset.SysSpeedBit=0;
+									sysset_save_para(&systemset);
+								}
+						}
+					else
+						{
+							break;
+						}
+				}
+			
+		}
+}
+
 

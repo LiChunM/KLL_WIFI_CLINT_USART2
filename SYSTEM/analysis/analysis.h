@@ -110,14 +110,6 @@ typedef	struct	SYS_PARA
 	u8 Key_val;		//按键值
 	u16	Key_filter;	//滤波按键
 
-	char	master_wifi_name[20];		//手柄的用户名
-	char	master_wifi_psw[20];		//手柄的用密码
-
-	char	defaute_wifi_name[20];	//默认配对手柄的用户名
-	char	defaute_wifi_psw[20];		//默认配对手柄的用户名
-
-	char	match_ssid[20];		//存放配对ssid
-	char 	match_psw[20];		//存放配对psw
 	//存放配对标志位，0x01 配对的是默认服务器 0x02, 配对的是标准服务器，
 	// 0xff， 第一次启动，还没有配对
 	char match_flag;		//是否配对完成
@@ -126,12 +118,20 @@ typedef	struct	SYS_PARA
 	u16 speed_min_couter;	//速度标示计数
 	u16 speed_max_couter;	
 
+
+	u8 speed_buf[20];
+	u8 spedd_counter;
+
 }SYS_PARA_T;
 extern SYS_PARA_T	sys_data;
 
 
 void dispose_wifi_cmd(u8 *pRecStr);
-
+u8 SaveUsnamePswd(u8 outtime);
+void RePayUP_CarData(u8 *len);
+void ReReg_CarData(u8 *len);
+u8 RegSucess(u8 outtime);
+void CheckSpeedBit(void);
 extern volatile u8 DataBiteInfo;
 
 

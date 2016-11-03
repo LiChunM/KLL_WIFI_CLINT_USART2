@@ -218,25 +218,19 @@ void SYS_Parameter_Init(void)
 	sysset_read_para(&systemset);
 	if(systemset.saveflag!=0X0A)
 		{
-			systemset.HandInter=250;
-			systemset.speedlimit=200;
-			systemset.delaytime=1;
-			systemset.Addrnum=0x01;
 			sprintf((char*)systemset.UserName,"KLL_APMODEAAA");
 			sprintf((char*)systemset.Passwd,"11111111");
-			systemset.saveflag=0x0A;
+			systemset.SysSpeedBit=0;
 			sysset_save_para(&systemset);
-			printf("This is the first boot.Please set the parameters\r\n");
+			printf("Can not Find WiFi Info\r\n");
+			SystemFlow=0;
 		}
 	else
 		{
 			printf("KLL_CAR_WIFI_V1.0.0\r\n");
-			printf("HandInter:%d\r\n",systemset.HandInter);
-			printf("SpedLmt:%d\r\n",systemset.speedlimit);
-			printf("Delaytime:%d\r\n",systemset.delaytime);
-			printf("Addrnum:%d\r\n",systemset.Addrnum);
 			printf("UserName:%s\r\n",systemset.UserName);
 			printf("Passwd:%s\r\n",systemset.Passwd);
+			SystemFlow=1;
 		}
 	sys_data.speed=0;
 	
@@ -247,61 +241,6 @@ void SYS_Parameter_Init(void)
 void Update_All(void)
 {
 	
-	Update_SysVol();
-	if(SW_CH2)my_core_data.frontled=0;
-	else my_core_data.frontled=1;
-	if(SW_CH1)my_core_data.bhandled=1;
-	else my_core_data.bhandled=0;
-			
-	if(adcvols.PA0VOL<=500)my_core_data.ledstatu=0x00;
-	if(adcvols.PA0VOL>=800&&adcvols.PA0VOL<=1200)my_core_data.ledstatu=0x01;
-	if(adcvols.PA0VOL>=1800&&adcvols.PA0VOL<=2200)my_core_data.ledstatu=0x02;
-	if(adcvols.PA0VOL>=3000)my_core_data.ledstatu=0x03;
-
-#if 0			
-	if(adcvols.PA1VOL<=500)my_core_data.jiansepeed=0x00;
-	if(adcvols.PA1VOL>=800&&adcvols.PA1VOL<=1200)my_core_data.jiansepeed=0x01;
-	if(adcvols.PA1VOL>=1800&&adcvols.PA1VOL<=2200)my_core_data.jiansepeed=0x02;
-	if(adcvols.PA1VOL>=3000)my_core_data.jiansepeed=0x03;
-			
-	if(adcvols.PA2VOL<=500)my_core_data.maxsepeed=0x00;
-	if(adcvols.PA2VOL>=800&&adcvols.PA2VOL<=1200)my_core_data.maxsepeed=0x01;
-	if(adcvols.PA2VOL>=1800&&adcvols.PA2VOL<=2200)my_core_data.maxsepeed=0x02;
-	if(adcvols.PA2VOL>=3000)my_core_data.maxsepeed=0x03;
-#endif
-
-	my_core_data.jiansepeed=adcvols.PA1VOL*100/3300;
-	my_core_data.maxsepeed=adcvols.PA2VOL*100/3300;
-	
-
-	if(adcvols.PA3VOL>1300)my_core_data.speed=(adcvols.PA3VOL-1300)*255/1700;
-	else	my_core_data.speed=0;
-	
-	my_core_data.voice=0x00;
-	my_core_data.waningled=0x00;
-	if(my_core_data.speed>=temps)
-		{
-			if(my_core_data.speed>(temps+20))my_core_data.voice=0x02;
-		}
-	else
-		{
-			if(my_core_data.speed<(temps+5))
-				{
-					my_core_data.waningled=0x01;
-					my_core_data.voice=0x03;
-				}
-		}
-	temps=my_core_data.speed;
-			
-	if(adcvols.PA4VOL>3000||adcvols.PA4VOL<400)
-		{
-			my_core_data.biandao=1;
-		}
-	
-	else	
-		{
-			my_core_data.biandao=0;
-		}
 }
 
 

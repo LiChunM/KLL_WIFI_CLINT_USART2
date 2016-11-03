@@ -110,8 +110,6 @@ void MC323_reconnection_task(void *pdata);
  {	 
  	JTAG_Set(0x02);
   	power_drv_init();
-	ACC_Init();
-	DRV_LEDR_OFF;
  	delay_init();	    	
 	NVIC_Configuration();
 	uart_init(72,115200);
@@ -160,33 +158,101 @@ void usart1_task(void *pdata)
 //usart2任务
 void usart2_task(void *pdata)
 {	
-	u8 status=0;
+	u8 t=0;
+	u8 res=0,length;
 	pdata = pdata;
 	while(1)
 	{
 		delay_ms(10);
-#if 0
-		status = PcdRequest(PICC_REQALL,RC522CT);
-		if(status==MI_OK)
+		if(systemset.saveflag!=0x0A)
 			{
-				printf("PcdRequest_MI_OK\r\n");
-				printf("pTagType[0x%02X%02X]\r\n",RC522CT[0],RC522CT[1]);
-				status=MI_ERR;
-				status = PcdAnticoll(RC522SN);
-				if(status==MI_OK)
+				if(SystemFlow==0)
 					{
-						status = MI_ERR;
-						printf("RC522RDID:%02x %02x %02x %02x\r\n",RC522SN[0],RC522SN[1],RC522SN[2],RC522SN[3]);
+SCANF:
+						Conecet2TheHandFromUdp();
+						res=SaveUsnamePswd(500);
+						if(res)
+							{
+								if(SystemDebug==2)printf("Conecet2TheHandFromUdp Next\r\n");
+								atk_8266_reset();
+								goto SCANF;
+							}
+						else
+							{
+								RePayUP_CarData(&length);
+								atk_8266_sendData(Hand_Data,length,0);
+								systemset.saveflag=0x0A;
+								sysset_save_para(&systemset);
+							}
+						SystemFlow=1;
 					}
-				delay_ms(1000);
-				delay_ms(1000);
+				if(SystemFlow==1)
+					{
+ResetAtk:
+						atk_8266_reset();
+						Conecet2TheHandFromUdp();
+						res=atk_8266_CheckStatus(50);
+						if(res)
+							{
+								if(SystemDebug==2)printf("Can not scan to wifi, continue scanning after reset\r\n");
+								goto ResetAtk;
+							}
+						else
+							{
+REG:
+								ReReg_CarData(&length);
+								atk_8266_sendData(Hand_Data,length,0);
+								res=RegSucess(300);
+								if(res)
+									{
+										if(t>10)
+											{
+												if(SystemDebug==2)printf("Reg Time Out\r\n");
+												t=0;
+												goto ResetAtk;
+											}
+										if(SystemDebug==2)printf("RegError Try Next\r\n");
+										t++;
+										goto REG;
+									}
+								else
+									{
+										RePayUP_CarData(&length);
+										atk_8266_sendData(Hand_Data,length,0);
+									}
+								
+							}
+						SystemFlow=2;
+					}
 			}
 		else
 			{
-				printf("PcdRequest_MI_ERROR,Next!!\r\n");
-				delay_ms(1000);
+				if(systemset.SysSpeedBit)
+					{
+						if(SystemFlow==0)
+							{
+ResetAtk2:
+								atk_8266_reset();
+								Conecet2TheHandFromUdp();
+								res=atk_8266_CheckStatus(50);
+								if(res)
+									{
+										systemset.SysSpeedBit=0;
+										if(SystemDebug==2)printf("Can not scan to wifi, continue scanning after reset\r\n");
+										goto ResetAtk2;
+									}
+								else
+									{
+										SystemFlow=2;
+									}
+							}
+					}
+				else
+					{
+						
+					}
 			}
-#endif
+		
 	}
 }     
 //gps任务
@@ -204,26 +270,19 @@ void main_task(void *pdata)
 {	
 	u8 res;
 	u8 lens=0;
-	M35PowerOn();
  	while(1)
 	{
 		delay_ms(10);
-		if(SystemFlow==0)
-			{	
-				Conecet2TheHandFromUdp();
-				USART2_RX_STA=0;
-				SystemFlow=1;
-			}
 	}
 }	
 
 void hand_task(void *pdata)
 {
-	u8 i;
 	pdata=pdata;
 	while(1)
 		{
-			delay_ms(100);	
+			delay_ms(10);
+			CheckSpeedBit();
 		}
 }
 void MC323_task(void *pdata)
@@ -233,8 +292,6 @@ void MC323_task(void *pdata)
 	while(1)
 		{
 			delay_ms(100);
-			
-			
 		}
 }
    		    
@@ -246,11 +303,6 @@ void xxx_task(void *pdata)
 	while(1)
 	{
 		delay_ms(10);
-		DRV_LEDL_ON;
-		delay_ms(200);
-		DRV_LEDL_OFF;
-		for(i=0;i<20;i++)delay_ms(500);
-		
 	}
 }
 

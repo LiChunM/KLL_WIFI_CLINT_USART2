@@ -11,4 +11,6 @@ extern volatile u8 DataSensoCheck;
 extern const u8 *modetbl[2];
 u8 atk_8266DataCheckOK(u16 waittime);
 u8 Conecet2TheHandFromUdp(void);
+void atk_8266_reset(void);
+u8 atk_8266_CheckStatus(u32 timeout);
 #endif
