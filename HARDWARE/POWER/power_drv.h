@@ -31,7 +31,8 @@
 extern u8 Config_Byte;
 void power_drv_init(void);
 void ACC_Init(void);
-
+void Sound_drv_init(void);
+u8 send_Alarm(u8 senddata);
 
 #endif
 

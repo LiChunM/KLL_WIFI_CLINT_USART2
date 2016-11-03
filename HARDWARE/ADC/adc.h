@@ -27,5 +27,6 @@ void Update_SysVol(void);
 void TIM1_PWM_init(u16 InitValue, u16 Pre_Divide);
 void PWM_Init(void);
 void moto_move(void);
+void Voice_Alarm_out(void);
 #endif
 

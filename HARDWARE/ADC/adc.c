@@ -233,3 +233,17 @@ void moto_move(void)
 }
 
 
+void Voice_Alarm_out(void)
+{
+	if((sys_data.music_switch ==1)&&(sys_data.music_section!=0)&&(sys_data.music_onoff ==0))
+	{
+		send_Alarm(sys_data.music_section);
+		sys_data.music_section = 0;
+		sys_data.music_onoff =1;
+	}
+	else
+	{
+		sys_data.music_section = 0;
+	}
+}
+

@@ -253,5 +253,15 @@ void User_Command_Analysis(u8 *buf)
 			SystemDebug=3;
 			printf("+debug 3\r\n");
 		}
+	p1=(u8*)strstr((const char*)buf,"$$sound");
+	if(p1!=NULL)
+		{
+			
+			mymemset(mybuf,0,sizeof(mybuf));
+			Get_Str_Use(mybuf,p1);
+			sys_data.music_section=strtol((const char*)mybuf,NULL,10);
+			printf("+sound %d\r\n",sys_data.music_section);
+			send_Alarm(sys_data.music_section);
+		}
 }
 

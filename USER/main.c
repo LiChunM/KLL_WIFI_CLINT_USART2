@@ -120,6 +120,7 @@ void MC323_reconnection_task(void *pdata);
 	PWM_Init();
 	TIM1_PWM_init(1500,16);
 	InitRc522();
+	Sound_drv_init();
 	IWDG_Init(4,625);
 	SYS_Parameter_Init();
 	OSInit();
@@ -164,6 +165,7 @@ void usart2_task(void *pdata)
 	while(1)
 	{
 		delay_ms(10);
+#if 0
 		status = PcdRequest(PICC_REQALL,RC522CT);
 		if(status==MI_OK)
 			{
@@ -184,6 +186,7 @@ void usart2_task(void *pdata)
 				printf("PcdRequest_MI_ERROR,Next!!\r\n");
 				delay_ms(1000);
 			}
+#endif
 	}
 }     
 //gps»ŒŒÒ
